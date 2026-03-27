@@ -16,28 +16,28 @@ using namespace std;
 
 class BigInteger {
 private:
-    vector<int> digits;  // Store digits in reverse order (least significant first)
-    bool isNegative;     // Sign flag
+    vector<int> digits_;  // Store digits in reverse order (least significant first)
+    bool negative_;     // Sign flag
 
     // Helper function to remove leading zeros
     void removeLeadingZeros() {
-        while (digits.size() > 1 && digits.back() == 0) {
-            digits.pop_back();
+        while (digits_.size() > 1 && digits_.back() == 0) {
+            digits_.pop_back();
         }
-        if (digits.size() == 1 && digits[0] == 0) {
-            isNegative = false;
+        if (digits_.size() == 1 && digits_[0] == 0) {
+            negative_ = false;
         }
     }
 
     // Helper function to compare absolute values
     // Returns: 1 if this > other, -1 if this < other, 0 if equal
     int compareAbs(const BigInteger& other) const {
-        if (digits.size() != other.digits.size()) {
-            return digits.size() > other.digits.size() ? 1 : -1;
+        if (digits_.size() != other.digits_.size()) {
+            return digits_.size() > other.digits_.size() ? 1 : -1;
         }
-        for (int i = digits.size() - 1; i >= 0; i--) {
-            if (digits[i] != other.digits[i]) {
-                return digits[i] > other.digits[i] ? 1 : -1;
+        for (int i = digits_.size() - 1; i >= 0; i--) {
+            if (digits_[i] != other.digits_[i]) {
+                return digits_[i] > other.digits_[i] ? 1 : -1;
             }
         }
         return 0;
@@ -46,15 +46,15 @@ private:
     // Addition of absolute values
     BigInteger addAbs(const BigInteger& other) const {
         BigInteger result;
-        result.digits.clear();
+        result.digits_.clear();
         int carry = 0;
-        size_t maxSize = max(digits.size(), other.digits.size());
+        size_t maxSize = max(digits_.size(), other.digits_.size());
 
         for (size_t i = 0; i < maxSize || carry; i++) {
             int sum = carry;
-            if (i < digits.size()) sum += digits[i];
-            if (i < other.digits.size()) sum += other.digits[i];
-            result.digits.push_back(sum % 10);
+            if (i < digits_.size()) sum += digits_[i];
+            if (i < other.digits_.size()) sum += other.digits_[i];
+            result.digits_.push_back(sum % 10);
             carry = sum / 10;
         }
         return result;
@@ -63,13 +63,13 @@ private:
     // Subtraction of absolute values (assumes this >= other)
     BigInteger subtractAbs(const BigInteger& other) const {
         BigInteger result;
-        result.digits.clear();
+        result.digits_.clear();
         int borrow = 0;
 
-        for (size_t i = 0; i < digits.size(); i++) {
-            int diff = digits[i] - borrow;
-            if (i < other.digits.size()) {
-                diff -= other.digits[i];
+        for (size_t i = 0; i < digits_.size(); i++) {
+            int diff = digits_[i] - borrow;
+            if (i < other.digits_.size()) {
+                diff -= other.digits_[i];
             }
 
             if (diff < 0) {
@@ -78,26 +78,26 @@ private:
             } else {
                 borrow = 0;
             }
-            result.digits.push_back(diff);
+            result.digits_.push_back(diff);
         }
         result.removeLeadingZeros();
         return result;
     }
 
     // Multiplication by single digit
-    BigInteger multiplyByDigit(int digit) const {
-        if (digit == 0) return BigInteger(0);
+    BigInteger multiplyByDigit(int digit_) const {
+        if (digit_ == 0) return BigInteger(0);
         BigInteger result;
-        result.digits.clear();
+        result.digits_.clear();
         int carry = 0;
 
-        for (int d : digits) {
+        for (int d : digits_) {
             int product = d * digit + carry;
-            result.digits.push_back(product % 10);
+            result.digits_.push_back(product % 10);
             carry = product / 10;
         }
         while (carry) {
-            result.digits.push_back(carry % 10);
+            result.digits_.push_back(carry % 10);
             carry /= 10;
         }
         return result;
@@ -105,73 +105,71 @@ private:
 
 public:
     // Constructors
-    BigInteger() : isNegative(false) {
-        digits.push_back(0);
+    BigInteger() : negative_(false) {
+        digits_.push_back(0);
     }
 
-    BigInteger(long long num) : isNegative(num < 0) {
+    BigInteger(long long num) : negative(num < 0) {
         if (num < 0) num = -num;
         if (num == 0) {
-            digits.push_back(0);
-            isNegative = false;
+            digits_.push_back(0);
+            negative_ = false;
         } else {
             while (num > 0) {
-                digits.push_back(num % 10);
+                digits_.push_back(num % 10);
                 num /= 10;
             }
         }
     }
 
-    BigInteger(const string& str) : isNegative(false) {
-        digits.clear();
+    BigInteger(const string& str) : negative(false) {
+        digits_.clear();
         size_t start = 0;
         if (!str.empty() && str[0] == '-') {
-            isNegative = true;
+            negative_ = true;
             start = 1;
         }
         if (start >= str.length()) {
-            digits.push_back(0);
-            isNegative = false;
+            digits_.push_back(0);
+            negative_ = false;
             return;
         }
         for (int i = str.length() - 1; i >= (int)start; i--) {
             if (str[i] >= '0' && str[i] <= '9') {
-                digits.push_back(str[i] - '0');
+                digits_.push_back(str[i] - '0');
             }
         }
-        if (digits.empty()) digits.push_back(0);
+        if (digits_.empty()) digits_.push_back(0);
         removeLeadingZeros();
     }
 
     // Convert to string
-    string tostring() const {
+    string to_string() const {
         string result;
-        for (int i = digits.size() - 1; i >= 0; i--) {
-            result += (char)('0' + digits[i]);
+        for (int i = digits_.size() - 1; i >= 0; i--) {
+            result += (char)('0' + digits_[i]);
         }
-        if (isNegative && !(digits.size() == 1 && digits[0] == 0)) {
+        if (negative_ && !(digits_.size() == 1 && digits_[0] == 0)) {
             result = "-" + result;
         }
         return result;
     }
 
-    // Addition
     BigInteger operator+(const BigInteger& other) const {
-        if (isNegative == other.isNegative) {
+        if (negative_ == other.negative_) {
             // Same sign: add absolute values
             BigInteger result = addAbs(other);
-            result.isNegative = isNegative;
+            result.negative_ = negative_;
             return result;
         } else {
-            // Different signs: subtract absolute values
             int cmp = compareAbs(other);
             BigInteger result;
             if (cmp >= 0) {
                 result = subtractAbs(other);
-                result.isNegative = isNegative;
+                result.negative_ = negative_;
             } else {
                 result = other.subtractAbs(*this);
-                result.isNegative = other.isNegative;
+                result.negative_ = other.negative_;
             }
             return result;
         }
@@ -180,38 +178,38 @@ public:
     // Subtraction
     BigInteger operator-(const BigInteger& other) const {
         BigInteger negOther = other;
-        negOther.isNegative = !negOther.isNegative;
+        negOther.negative_ = !negOther.negative_;
         return *this + negOther;
     }
 
     // Multiplication
     BigInteger operator*(const BigInteger& other) const {
-        if ((digits.size() == 1 && digits[0] == 0) ||
-            (other.digits.size() == 1 && other.digits[0] == 0)) {
+        if ((digits_.size() == 1 && digits_[0] == 0) ||
+            (other.digits_.size() == 1 && other.digits_[0] == 0)) {
             return BigInteger(0);
         }
 
         BigInteger result(0);
-        result.digits.clear();
-        result.digits.resize(digits.size() + other.digits.size(), 0);
+        result.digits_.clear();
+        result.digits_.resize(digits_.size() + other.digits_.size(), 0);
 
-        for (size_t i = 0; i < digits.size(); i++) {
-            for (size_t j = 0; j < other.digits.size(); j++) {
-                result.digits[i + j] += digits[i] * other.digits[j];
-                result.digits[i + j + 1] += result.digits[i + j] / 10;
-                result.digits[i + j] %= 10;
+        for (size_t i = 0; i < digits_.size(); i++) {
+            for (size_t j = 0; j < other.digits_.size(); j++) {
+                result.digits_[i + j] += digits_[i] * other.digits_[j];
+                result.digits_[i + j + 1] += result.digits_[i + j] / 10;
+                result.digits_[i + j] %= 10;
             }
         }
 
         result.removeLeadingZeros();
-        result.isNegative = (isNegative != other.isNegative) &&
-                           !(result.digits.size() == 1 && result.digits[0] == 0);
+        result.negative_ = (negative != other.negative_) &&
+                           !(result.digits_.size() == 1 && result.digits_[0] == 0);
         return result;
     }
 
     // Division
     BigInteger operator/(const BigInteger& other) const {
-        if (other.digits.size() == 1 && other.digits[0] == 0) {
+        if (other.digits_.size() == 1 && other.digits_[0] == 0) {
             throw runtime_error("Division by zero");
         }
 
@@ -220,16 +218,16 @@ public:
         }
 
         BigInteger dividend = *this;
-        dividend.isNegative = false;
+        dividend.negative_ = false;
         BigInteger divisor = other;
-        divisor.isNegative = false;
+        divisor.negative_ = false;
 
         BigInteger quotient(0);
-        quotient.digits.clear();
+        quotient.digits_.clear();
         BigInteger current(0);
 
-        for (int i = digits.size() - 1; i >= 0; i--) {
-            current.digits.insert(current.digits.begin(), dividend.digits[i]);
+        for (int i = digits_.size() - 1; i >= 0; i--) {
+            current.digits_.insert(current.digits_.begin(), dividend.digits_[i]);
             current.removeLeadingZeros();
 
             int count = 0;
@@ -237,18 +235,18 @@ public:
                 current = current - divisor;
                 count++;
             }
-            quotient.digits.insert(quotient.digits.begin(), count);
+            quotient.digits_.insert(quotient.digits_.begin(), count);
         }
 
         quotient.removeLeadingZeros();
-        quotient.isNegative = (isNegative != other.isNegative) &&
-                             !(quotient.digits.size() == 1 && quotient.digits[0] == 0);
+        quotient.negative_ = (negative_ != other.negative_) &&
+                             !(quotient.digits_.size() == 1 && quotient.digits_[0] == 0);
         return quotient;
     }
 
     // Modulo
     BigInteger operator%(const BigInteger& other) const {
-        if (other.digits.size() == 1 && other.digits[0] == 0) {
+        if (other.digits_.size() == 1 && other.digits_[0] == 0) {
             throw runtime_error("Modulo by zero");
         }
         BigInteger quotient = *this / other;
@@ -258,8 +256,8 @@ public:
 
     // Comparison operators
     bool operator==(const BigInteger& other) const {
-        if (isNegative != other.isNegative) return false;
-        return digits == other.digits;
+        if (negative_ != other.negative_) return false;
+        return digits_ == other.digits_;
     }
 
     bool operator!=(const BigInteger& other) const {
@@ -267,9 +265,9 @@ public:
     }
 
     bool operator<(const BigInteger& other) const {
-        if (isNegative != other.isNegative) return isNegative;
+        if (negative_ != other.negative_) return negative_;
         int cmp = compareAbs(other);
-        return isNegative ? cmp > 0 : cmp < 0;
+        return negative_ ? cmp > 0 : cmp < 0;
     }
 
     bool operator>(const BigInteger& other) const {
@@ -286,7 +284,7 @@ public:
 
     // Stream operators
     friend ostream& operator<<(ostream& os, const BigInteger& num) {
-        os << num.toString();
+        os << num.to_string();
         return os;
     }
 
@@ -300,7 +298,7 @@ public:
     // Additional useful functions
     BigInteger abs() const {
         BigInteger result = *this;
-        result.isNegative = false;
+        result.negative_ = false;
         return result;
     }
 
@@ -327,10 +325,63 @@ public:
         BigInteger a = abs();
         BigInteger b = other.abs();
 
-        while (!(b.digits.size() == 1 && b.digits[0] == 0)) {
+        while (!(b.digits_.size() == 1 && b.digits_[0] == 0)) {
             BigInteger temp = b;
             b = a % b;
             a = temp;
+		}
+	bool BigInteger::is_zero() const {
+    return digits_.size() == 1 && digits_[0] == 0;
+	}
+	
+	bool BigInteger::is_negative() const {
+    	return negative_;
+	}
+	BigInteger& BigInteger::operator+=(const BigInteger& rhs) {
+    *this = *this + rhs;
+    return *this;
+	}
+	BigInteger& BigInteger::operator-=(const BigInteger& rhs) {
+    *this = *this - rhs;
+    return *this;
+	}
+	BigInteger& BigInteger::operator*=(const BigInteger& rhs) {
+    *this = *this * rhs;
+    return *this;
+	}
+	BigInteger& BigInteger::operator/=(const BigInteger& rhs) {
+    *this = *this / rhs;
+    return *this;
+	}
+	BigInteger& BigInteger::operator%=(const BigInteger& rhs) {
+    *this = *this % rhs;
+    return *this;
+	}
+	BigInteger& BigInteger::operator++() {
+    *this += BigInteger(1);
+    return *this;
+}
+
+	BigInteger BigInteger::operator++(int) {
+    	BigInteger temp = *this;
+    	++(*this);
+    	return temp;
+	}
+	BigInteger& BigInteger::operator--() {
+    *this += BigInteger(1);
+    return *this;
+	}
+
+	BigInteger BigInteger::operator--(int) {
+    	BigInteger temp = *this;
+    	++(*this);
+    	return temp;
+	}
+	BigInteger::operator bool() const {
+    	return !is_zero();
+	BigInteger::BigInteger(int value) : BigInteger((long long)value) {}
+	}
+	}
         }
         return a;
     }
