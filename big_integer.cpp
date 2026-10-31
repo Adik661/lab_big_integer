@@ -92,7 +92,7 @@ private:
         int carry = 0;
 
         for (int d : digits_) {
-            int product = d * digit + carry;
+            int product = d * digit_ + carry;
             result.digits_.push_back(product % 10);
             carry = product / 10;
         }
@@ -109,7 +109,7 @@ public:
         digits_.push_back(0);
     }
 
-    BigInteger(long long num) : negative(num < 0) {
+    BigInteger(long long num) : negative_(num < 0) { //Ошибка связана с ???
         if (num < 0) num = -num;
         if (num == 0) {
             digits_.push_back(0);
@@ -122,7 +122,7 @@ public:
         }
     }
 
-    BigInteger(const string& str) : negative(false) {
+    BigInteger(const string& str) : negative_(false) {
         digits_.clear();
         size_t start = 0;
         if (!str.empty() && str[0] == '-') {
@@ -202,7 +202,7 @@ public:
         }
 
         result.removeLeadingZeros();
-        result.negative_ = (negative != other.negative_) &&
+        result.negative_ = (negative_ != other.negative_) && // Опять какой-то negative. Единственный негативный тут ты, нега
                            !(result.digits_.size() == 1 && result.digits_[0] == 0);
         return result;
     }
@@ -329,60 +329,68 @@ public:
             BigInteger temp = b;
             b = a % b;
             a = temp;
-		}
-	bool BigInteger::is_zero() const {
-    return digits_.size() == 1 && digits_[0] == 0;
-	}
-	
-	bool BigInteger::is_negative() const {
-    	return negative_;
-	}
-	BigInteger& BigInteger::operator+=(const BigInteger& rhs) {
-    *this = *this + rhs;
-    return *this;
-	}
-	BigInteger& BigInteger::operator-=(const BigInteger& rhs) {
-    *this = *this - rhs;
-    return *this;
-	}
-	BigInteger& BigInteger::operator*=(const BigInteger& rhs) {
-    *this = *this * rhs;
-    return *this;
-	}
-	BigInteger& BigInteger::operator/=(const BigInteger& rhs) {
-    *this = *this / rhs;
-    return *this;
-	}
-	BigInteger& BigInteger::operator%=(const BigInteger& rhs) {
-    *this = *this % rhs;
-    return *this;
-	}
-	BigInteger& BigInteger::operator++() {
-    *this += BigInteger(1);
-    return *this;
-}
-
-	BigInteger BigInteger::operator++(int) {
-    	BigInteger temp = *this;
-    	++(*this);
-    	return temp;
-	}
-	BigInteger& BigInteger::operator--() {
-    *this += BigInteger(1);
-    return *this;
-	}
-
-	BigInteger BigInteger::operator--(int) {
-    	BigInteger temp = *this;
-    	++(*this);
-    	return temp;
-	}
-	BigInteger::operator bool() const {
-    	return !is_zero();
-	BigInteger::BigInteger(int value) : BigInteger((long long)value) {}
-	}
-	}
         }
         return a;
     }
+
+    bool is_zero() const {
+        return digits_.size() == 1 && digits_[0] == 0;
+    }
+
+    bool is_negative() const {
+        return negative_;
+    }
+
+    BigInteger& operator+=(const BigInteger& rhs) {
+        *this = *this + rhs;
+        return *this;
+    }
+
+    BigInteger& operator-=(const BigInteger& rhs) {
+        *this = *this - rhs;
+        return *this;
+    }
+
+    BigInteger& operator*=(const BigInteger& rhs) {
+        *this = *this * rhs;
+        return *this;
+    }
+
+    BigInteger& operator/=(const BigInteger& rhs) {
+        *this = *this / rhs;
+        return *this;
+    }
+
+    BigInteger& operator%=(const BigInteger& rhs) {
+        *this = *this % rhs;
+        return *this;
+    }
+
+    BigInteger& operator++() {
+        *this += BigInteger(1);
+        return *this;
+    }
+
+    BigInteger operator++(int) {
+        BigInteger temp = *this;
+        ++(*this);
+        return temp;
+    }
+
+    BigInteger& operator--() {
+        *this -= BigInteger(1);
+        return *this;
+    }
+
+    BigInteger operator--(int) {
+        BigInteger temp = *this;
+        --(*this);
+        return temp;
+    }
+
+    explicit operator bool() const {
+        return !is_zero();
+    }
+
+    BigInteger(int value) : BigInteger((long long)value) {}
 };
