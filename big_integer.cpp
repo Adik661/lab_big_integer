@@ -393,4 +393,82 @@ public:
     }
 
     BigInteger(int value) : BigInteger((long long)value) {}
+
+        // Унарный минус
+    BigInteger operator-() const {
+        BigInteger r = *this;
+        if (!r.is_zero()) r.negative_ = !r.negative_;
+        return r;
+    }
+
+    // Количество цифр и сумма цифр
+    size_t digit_count() const { return digits_.size(); }
+
+    int digit_sum() const {
+        int s = 0;
+        for (int d : digits_) s += d;
+        return s;
+    }
+
+    // Чётность
+    bool is_even() const { return digits_[0] % 2 == 0; }
+
+    // Факториал
+    static BigInteger factorial(int n) {
+        if (n < 0) throw runtime_error("Negative factorial");
+        BigInteger r(1);
+        for (int i = 2; i <= n; i++) r *= BigInteger(i);
+        return r;
+    }
+
+    // Число Фибоначчи
+    static BigInteger fibonacci(int n) {
+        BigInteger a(0), b(1);
+        for (int i = 0; i < n; i++) {
+            BigInteger t = a + b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+
+    // Возведение в степень по модулю (a^exp mod m), полезно для криптографии
+    BigInteger mod_pow(BigInteger exp, const BigInteger& mod) const {
+        if (exp.is_negative()) throw runtime_error("Negative exponent");
+        BigInteger result(1), base = *this % mod;
+        const BigInteger two(2);
+        while (!exp.is_zero()) {
+            if (!exp.is_even()) result = (result * base) % mod;
+            base = (base * base) % mod;
+            exp /= two;
+        }
+        return result;
+    }
+
+    // Целочисленный квадратный корень (метод Ньютона)
+    BigInteger isqrt() const {
+        if (negative_) throw runtime_error("Sqrt of negative");
+        if (is_zero()) return BigInteger(0);
+        BigInteger x = *this, y = (x + BigInteger(1)) / BigInteger(2);
+        while (y < x) {
+            x = y;
+            y = (x + *this / x) / BigInteger(2);
+        }
+        return x;
+    }
+
+    // НОК
+    BigInteger lcm(const BigInteger& other) const {
+        if (is_zero() || other.is_zero()) return BigInteger(0);
+        return (abs() / gcd(other)) * other.abs();
+    }
+
+    // Проверка на простоту (простая, для небольших чисел)
+    bool is_prime() const {
+        if (negative_ || *this < BigInteger(2)) return false;
+        BigInteger limit = isqrt();
+        for (BigInteger i(2); i <= limit; ++i)
+            if ((*this % i).is_zero()) return false;
+        return true;
+    }
 };
